@@ -12,3 +12,5 @@ python-dotenv
 requests
 openai
 pandas-ta
+transformers
+torch
