@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from services.market_data import get_stock_history, get_stock_info
+import uuid
 from services.news_data import get_stock_news
 from analysis.sentiment import analyze_sentiment
 from schemas.responses import NewsItem
@@ -40,8 +40,12 @@ async def read_stock_news(ticker: str):
         if 'title' in item:
             sentiment_score = analyze_sentiment(item['title'])
         
+        news_uuid = item.get("uuid")
+        if not news_uuid:
+            news_uuid = str(uuid.uuid4())
+        
         enriched_news.append(NewsItem(
-            uuid=item.get("uuid", ""),
+            uuid=news_uuid,
             title=item.get("title", ""),
             publisher=item.get("publisher", ""),
             link=item.get("link", ""),
