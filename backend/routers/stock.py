@@ -1,9 +1,12 @@
-from fastapi import APIRouter, HTTPException
 import uuid
-from services.news_data import get_stock_news
+from typing import List, Dict, Any
+
+from fastapi import APIRouter, HTTPException
+
 from analysis.sentiment import analyze_sentiment
 from schemas.responses import NewsItem
-from typing import List
+from services.market_data import get_stock_history, get_stock_info
+from services.news_data import get_stock_news
 
 router = APIRouter(
     prefix="/stock",
@@ -13,32 +16,47 @@ router = APIRouter(
 
 
 @router.get("/{ticker}/history")
-async def read_stock_history(ticker: str, period: str = "1y", interval: str = "1d"):
+async def read_stock_history(
+    ticker: str, period: str = "1y", interval: str = "1d"
+) -> List[Dict[str, Any]]:
+    """
+    Fetch historical stock data.
+    """
     df = get_stock_history(ticker, period, interval)
     if df.empty:
         raise HTTPException(status_code=404, detail="Stock data not found")
+    
     # Convert DataFrame to JSON-compatible format (list of records)
     # Reset index to include Date
     df.reset_index(inplace=True)
-    return df.to_dict(orient="records")
+    # Pandas to_dict returns list of dicts, but type inference needs help sometimes
+    return df.to_dict(orient="records") # type: ignore
+
 
 @router.get("/{ticker}/info")
-async def read_stock_info(ticker: str):
+async def read_stock_info(ticker: str) -> Dict[str, Any]:
+    """
+    Fetch basic stock information.
+    """
     info = get_stock_info(ticker)
     if not info:
         raise HTTPException(status_code=404, detail="Stock info not found")
     return info
 
+
 @router.get("/{ticker}/news", response_model=List[NewsItem])
-async def read_stock_news(ticker: str):
+async def read_stock_news(ticker: str) -> List[NewsItem]:
+    """
+    Fetch and analyze news for a specific stock ticker.
+    """
     news = get_stock_news(ticker)
     # Enrich with sentiment
     enriched_news = []
     for item in news:
         # Map yfinance news dict to our schema
         sentiment_score = 0.0
-        if 'title' in item:
-            sentiment_score = analyze_sentiment(item['title'])
+        if "title" in item:
+            sentiment_score = analyze_sentiment(item["title"])
         
         news_uuid = item.get("uuid")
         if not news_uuid:
@@ -54,3 +72,4 @@ async def read_stock_news(ticker: str):
             sentiment=sentiment_score
         ))
     return enriched_news
+
