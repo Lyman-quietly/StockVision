@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from services.market_data import get_stock_history
 from analysis.statistical_models import predict_moving_average, predict_linear_trend, predict_arima
 from analysis.ml_models import train_and_predict_rf, train_and_predict_xgb, train_and_predict_svr
+from schemas.responses import PredictionResponse, PredictionStats
 
 router = APIRouter(
     prefix="/predict",
@@ -9,7 +10,7 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
-@router.get("/{ticker}")
+@router.get("/{ticker}", response_model=PredictionResponse)
 async def get_predictions(ticker: str):
     # Fetch ample data for training/stats
     df = get_stock_history(ticker, period="2y", interval="1d")

@@ -1,11 +1,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from core.config import settings
 
-app = FastAPI(title="StockVision API", description="Backend for StockVision Desktop Application")
+app = FastAPI(title=settings.PROJECT_NAME, version=settings.VERSION)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Allow all for local desktop app usage
+    allow_origins=settings.ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
