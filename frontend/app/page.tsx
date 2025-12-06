@@ -2,24 +2,25 @@
 
 import * as React from "react"
 import { useState } from "react"
-import { Search, TrendingUp, TrendingDown, Activity, Newspaper } from "lucide-react"
+import { Search, TrendingUp, Activity, Newspaper } from "lucide-react"
 import { StockChart } from "@/components/StockChart"
 import { Predictions } from "@/components/Predictions"
 import { NewsFeed } from "@/components/NewsFeed"
 import { stockService } from "@/services/api"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { cn } from "@/lib/utils"
+import { useCallback } from "react"
+import { StockHistory, NewsItem, PredictionResponse } from "@/services/api"
 
 export default function Dashboard() {
   const [ticker, setTicker] = useState("AAPL")
   const [loading, setLoading] = useState(false)
-  const [history, setHistory] = useState<any[]>([])
-  const [news, setNews] = useState<any[]>([])
-  const [predictions, setPredictions] = useState<any>(null)
+  const [history, setHistory] = useState<StockHistory[]>([])
+  const [news, setNews] = useState<NewsItem[]>([])
+  const [predictions, setPredictions] = useState<PredictionResponse | null>(null)
   const [error, setError] = useState("")
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true)
     setError("")
     try {
@@ -37,12 +38,13 @@ export default function Dashboard() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [ticker]) // Dependency on ticker
 
   // Initial fetch
   React.useEffect(() => {
     fetchData()
-  }, [])
+  }, [fetchData])
+
 
   return (
     <div className="min-h-screen bg-background p-6 space-y-8">

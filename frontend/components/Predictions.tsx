@@ -1,7 +1,7 @@
 "use client"
 
-import { PredictionResponse, PredictionStats } from "@/services/api"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { PredictionResponse } from "@/services/api"
+import { Card } from "@/components/ui/card"
 import { Brain, Calculator, ChevronRight } from "lucide-react"
 
 interface PredictionsProps {
@@ -34,7 +34,7 @@ export function Predictions({ data }: PredictionsProps) {
                     title="ARIMA"
                     icon={<Calculator className="h-4 w-4 text-orange-400" />}
                     // ARIMA returns a forecast array, take the first one
-                    prediction={data.statistical.arima.forecast?.[0]}
+                    prediction={data.statistical.arima.predictions?.[0]}
                     type="Statistical"
                 />
 
