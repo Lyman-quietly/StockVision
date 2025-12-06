@@ -11,3 +11,4 @@ textblob
 python-dotenv
 requests
 openai
+pandas-ta
